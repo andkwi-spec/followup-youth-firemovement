@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Youth Fire Movement GKKD-BP • Follow-Up Jiwa Baru</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,41 +35,34 @@
         };
     </script>
     <style>
-        /* Compact Mobile-First Scale */
+        /* Adaptive Scale: Compact on Mobile, Comfortable on Desktop */
         html {
             font-size: 13.5px;
         }
-        @media (min-width: 640px) {
+        @media (min-width: 768px) {
             html {
-                font-size: 14px;
+                font-size: 15px;
             }
         }
 
         body {
             -webkit-tap-highlight-color: transparent;
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #090d16;
+            background-color: #f1f5f9;
         }
 
         /* Lock background scroll when any modal is active */
         body.modal-open {
-            position: fixed;
-            width: 100%;
-            left: 0;
-            right: 0;
             overflow: hidden;
-            touch-action: none;
         }
 
         /* Contain overscroll strictly inside modal scroll containers */
         .modal-scroll-body {
             overscroll-behavior: contain;
-            overscroll-behavior-y: contain;
             -webkit-overflow-scrolling: touch;
-            touch-action: pan-y;
         }
 
-        /* Hide scrollbars cleanly */
+        /* Hide scrollbars cleanly for horizontal pill bars */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -78,341 +71,376 @@
             scrollbar-width: none;
         }
 
-        /* Modal backdrop & dialog transitions */
-        .popup-backdrop {
-            transition: opacity 0.2s ease-out;
-            touch-action: none;
-        }
-        .popup-dialog {
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease-out;
+        /* Subtle custom scrollbar for desktop modals */
+        @media (min-width: 768px) {
+            .modal-scroll-body::-webkit-scrollbar {
+                width: 6px;
+            }
+            .modal-scroll-body::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .modal-scroll-body::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 9999px;
+            }
+            .modal-scroll-body::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-800 flex justify-center min-h-screen sm:py-4">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- Mobile Frame Container -->
-    <div id="appRoot" class="w-full max-w-md bg-slate-50 min-h-screen sm:min-h-[850px] sm:max-h-[900px] sm:rounded-[36px] sm:shadow-2xl sm:border-[8px] sm:border-slate-800 flex flex-col relative overflow-hidden">
-        
-        <!-- HEADER & LIVE KPI DASHBOARD -->
-        <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 px-3.5 pt-3 pb-2.5 shadow-md">
-            <div class="flex items-center justify-between mb-2">
-                <div>
-                    <span class="text-[9.5px] font-extrabold tracking-widest text-sky-400 uppercase flex items-center gap-1">
-                        <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i> YOUTH FIRE MOVEMENT GKKD-BP
+    <!-- ========================================== -->
+    <!-- HEADER & LIVE KPI DASHBOARD (FULL WIDTH)   -->
+    <!-- ========================================== -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
+        <div class="max-w-6xl mx-auto px-3.5 sm:px-6 pt-3 pb-3">
+            <div class="flex items-center justify-between gap-3 mb-2.5 sm:mb-3">
+                <div class="min-w-0">
+                    <span class="text-[9.5px] sm:text-[11px] font-extrabold tracking-widest text-sky-400 uppercase flex items-center gap-1">
+                        <i data-lucide="sparkles" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0"></i>
+                        <span class="truncate">YOUTH FIRE MOVEMENT GKKD-BP</span>
                     </span>
-                    <h1 class="text-base font-extrabold text-white tracking-tight leading-tight">Follow-Up Jiwa Baru</h1>
+                    <h1 class="text-base sm:text-xl font-extrabold text-white tracking-tight leading-tight">Follow-Up Jiwa Baru</h1>
                 </div>
 
-                <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                    <!-- Desktop Add Button (Visible on md+) -->
+                    <button onclick="openAddModal()" class="hidden md:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white shadow-sm shadow-sky-600/30 active:scale-95 transition-all">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                        <span>Tambah Jiwa Baru</span>
+                    </button>
+
                     <!-- Quick Refresh Button -->
-                    <button onclick="fetchFromSheetDB(true)" title="Muat ulang data dari Google Sheets" class="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 flex items-center justify-center active:scale-95 transition-all">
-                        <i data-lucide="refresh-cw" id="refreshIcon" class="w-3.5 h-3.5"></i>
+                    <button onclick="fetchFromSheetDB(true)" title="Muat ulang data dari Google Sheets" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 flex items-center justify-center active:scale-95 transition-all">
+                        <i data-lucide="refresh-cw" id="refreshIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                     </button>
 
                     <!-- Google Sheets Config Trigger -->
-                    <button onclick="openConfigModal()" id="syncBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-bold bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 active:scale-95 transition-all">
-                        <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                    <button onclick="openConfigModal()" id="syncBadge" class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-[10.5px] sm:text-xs font-bold bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 active:scale-95 transition-all">
+                        <span id="syncDot" class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 animate-pulse"></span>
                         <span id="syncText">Menghubungkan...</span>
-                        <i data-lucide="settings" class="w-3 h-3 text-sky-400"></i>
+                        <i data-lucide="settings" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-sky-400"></i>
                     </button>
                 </div>
             </div>
 
             <!-- LIVE METRICS BAR (4 KPI Cards) -->
-            <div class="grid grid-cols-4 gap-1.5">
-                <div class="bg-slate-800/80 px-1.5 py-1 rounded-xl border border-slate-700 text-center">
-                    <span class="text-[8.5px] font-bold text-slate-400 uppercase block">Total</span>
-                    <span class="text-xs font-extrabold text-white" id="statTotal">0</span>
+            <div class="grid grid-cols-4 gap-1.5 sm:gap-3">
+                <div class="bg-slate-800/80 px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-slate-700 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
+                    <span class="text-[8.5px] sm:text-xs font-bold text-slate-400 uppercase block">
+                        <span class="sm:hidden">Total</span>
+                        <span class="hidden sm:inline">Total Jiwa</span>
+                    </span>
+                    <span class="text-xs sm:text-lg font-extrabold text-white" id="statTotal">0</span>
                 </div>
-                <div class="bg-sky-950/60 px-1.5 py-1 rounded-xl border border-sky-800/60 text-center">
-                    <span class="text-[8.5px] font-bold text-sky-300 uppercase block">Ibadah</span>
-                    <span class="text-xs font-extrabold text-sky-200" id="statYouthPct">0%</span>
+                <div class="bg-sky-950/60 px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-sky-800/60 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
+                    <span class="text-[8.5px] sm:text-xs font-bold text-sky-300 uppercase block">
+                        <span class="sm:hidden">Ibadah</span>
+                        <span class="hidden sm:inline">Ibadah Youth</span>
+                    </span>
+                    <span class="text-xs sm:text-lg font-extrabold text-sky-200" id="statYouthPct">0%</span>
                 </div>
-                <div class="bg-indigo-950/60 px-1.5 py-1 rounded-xl border border-indigo-800/60 text-center">
-                    <span class="text-[8.5px] font-bold text-indigo-300 uppercase block">Gerlok</span>
-                    <span class="text-xs font-extrabold text-indigo-200" id="statGerlokPct">0%</span>
+                <div class="bg-indigo-950/60 px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-indigo-800/60 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
+                    <span class="text-[8.5px] sm:text-xs font-bold text-indigo-300 uppercase block">
+                        <span class="sm:hidden">Gerlok</span>
+                        <span class="hidden sm:inline">Gereja Lokal</span>
+                    </span>
+                    <span class="text-xs sm:text-lg font-extrabold text-indigo-200" id="statGerlokPct">0%</span>
                 </div>
-                <div class="bg-emerald-950/60 px-1.5 py-1 rounded-xl border border-emerald-800/60 text-center">
-                    <span class="text-[8.5px] font-bold text-emerald-300 uppercase block">Murid</span>
-                    <span class="text-xs font-extrabold text-emerald-200" id="statDimuridkanPct">0%</span>
+                <div class="bg-emerald-950/60 px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-emerald-800/60 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
+                    <span class="text-[8.5px] sm:text-xs font-bold text-emerald-300 uppercase block">
+                        <span class="sm:hidden">Murid</span>
+                        <span class="hidden sm:inline">Dimuridkan</span>
+                    </span>
+                    <span class="text-xs sm:text-lg font-extrabold text-emerald-200" id="statDimuridkanPct">0%</span>
                 </div>
             </div>
-        </header>
+        </div>
+    </header>
 
-        <!-- SEARCH & FILTER BAR -->
-        <section class="bg-white px-3.5 py-2 border-b border-slate-200/80 space-y-2 shadow-xs z-20">
+    <!-- ========================================== -->
+    <!-- SEARCH & FILTER BAR                        -->
+    <!-- ========================================== -->
+    <section class="bg-white border-b border-slate-200/90 shadow-xs z-20">
+        <div class="max-w-6xl mx-auto px-3.5 sm:px-6 py-2.5 sm:py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
             <!-- Search Field -->
-            <div class="relative">
-                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                <input type="text" id="searchInput" placeholder="Cari nama jiwa baru..." 
-                       class="w-full bg-slate-100 border border-slate-200/90 text-slate-800 text-xs rounded-xl pl-8 pr-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all placeholder:text-slate-400 font-medium"
+            <div class="relative w-full md:w-80 lg:w-96">
+                <i data-lucide="search" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input type="text" id="searchInput" placeholder="Cari nama, kampus/kerja, persekutuan..." 
+                       class="w-full bg-slate-100 border border-slate-200/90 text-slate-800 text-xs sm:text-sm rounded-xl pl-8 sm:pl-9 pr-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all placeholder:text-slate-400 font-medium"
                        oninput="handleSearchFilter()">
             </div>
 
-            <!-- Filter Pills Horizontal Scroll -->
-            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 text-[10.5px]">
-                <button onclick="setFilter('semua')" id="pill-semua" class="filter-pill shrink-0 px-2.5 py-1 rounded-xl font-bold transition-all bg-slate-900 text-white shadow-xs">
+            <!-- Filter Pills -->
+            <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 text-[10.5px] sm:text-xs">
+                <button onclick="setFilter('semua')" id="pill-semua" class="filter-pill shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl font-bold transition-all bg-slate-900 text-white shadow-xs">
                     Semua (<span id="cnt-semua">0</span>)
                 </button>
-                <button onclick="setFilter('belum-lengkap')" id="pill-belum-lengkap" class="filter-pill shrink-0 px-2.5 py-1 rounded-xl font-semibold transition-all bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100">
+                <button onclick="setFilter('belum-lengkap')" id="pill-belum-lengkap" class="filter-pill shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl font-semibold transition-all bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100">
                     Belum Lengkap (<span id="cnt-belum-lengkap">0</span>)
                 </button>
-                <button onclick="setFilter('lengkap')" id="pill-lengkap" class="filter-pill shrink-0 px-2.5 py-1 rounded-xl font-semibold transition-all bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100">
+                <button onclick="setFilter('lengkap')" id="pill-lengkap" class="filter-pill shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl font-semibold transition-all bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100">
                     Lengkap 4/4 (<span id="cnt-lengkap">0</span>)
                 </button>
-                <button onclick="setFilter('tidak')" id="pill-tidak" class="filter-pill shrink-0 px-2.5 py-1 rounded-xl font-semibold transition-all bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100">
+                <button onclick="setFilter('tidak')" id="pill-tidak" class="filter-pill shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl font-semibold transition-all bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100">
                     Ada TIDAK (<span id="cnt-tidak">0</span>)
                 </button>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- MAIN SCROLLABLE MASTER LIST -->
-        <main id="mainListArea" class="flex-1 overflow-y-auto px-3 py-2.5 space-y-1.5 no-scrollbar pb-24">
-            <div id="cardsContainer" class="space-y-1.5">
-                <!-- Compact list rows dynamically injected here -->
+    <!-- ========================================== -->
+    <!-- MAIN RESPONSIVE GRID LIST                  -->
+    <!-- ========================================== -->
+    <main id="mainListArea" class="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 py-3 sm:py-5 pb-24 md:pb-10">
+        <!-- 1 col on mobile, 2 cols on tablet, 3 cols on desktop -->
+        <div id="cardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3.5">
+            <!-- Dynamic cards injected here -->
+        </div>
+
+        <!-- LOADING STATE -->
+        <div id="loadingState" class="hidden py-20 text-center space-y-3">
+            <div class="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center mx-auto text-sky-600 animate-spin">
+                <i data-lucide="loader-2" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-slate-700 text-sm">Memuat data dari Google Sheets...</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Menghubungkan ke SheetDB API</p>
+            </div>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div id="emptyState" class="hidden py-20 text-center space-y-3">
+            <div class="w-12 h-12 bg-slate-200/70 rounded-full flex items-center justify-center mx-auto text-slate-400">
+                <i data-lucide="user-x" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-slate-700 text-sm">Tidak ada data jiwa baru</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Coba ubah kata kunci pencarian atau filter status.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- MOBILE FLOATING ACTION BUTTON (Hidden on md+ desktop since header has button) -->
+    <button onclick="openAddModal()" 
+            class="md:hidden fixed bottom-4 right-4 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white px-3.5 py-3 rounded-full shadow-lg shadow-sky-600/30 flex items-center gap-1.5 transition-all z-20 focus:outline-none">
+        <i data-lucide="user-plus" class="w-4 h-4"></i>
+        <span class="font-bold text-xs">Tambah Jiwa Baru</span>
+    </button>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-16 md:bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-full shadow-xl border border-slate-700 flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 z-[60] whitespace-nowrap">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toastMsg">Data berhasil diperbarui!</span>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- CENTERED POP-UP MODAL (DETAIL & CHECKLIST) -->
+    <!-- ========================================== -->
+    <div id="popUpModal" class="fixed inset-0 z-40 flex items-center justify-center p-3 sm:p-6 pointer-events-none opacity-0 transition-opacity duration-200">
+        <!-- Dark Backdrop -->
+        <div onclick="closePopUp()" class="absolute inset-0 bg-slate-950/75 backdrop-blur-xs"></div>
+        
+        <!-- Modal Dialog Container -->
+        <div class="relative w-full max-w-md sm:max-w-xl bg-white rounded-2xl shadow-2xl max-h-[88vh] flex flex-col overflow-hidden border border-slate-100">
+            <!-- STICKY MODAL HEADER -->
+            <div id="popUpHeader" class="bg-slate-900 text-white p-3.5 sm:px-5 sm:py-4 shrink-0 flex items-center justify-between border-b border-slate-800">
+                <!-- Dynamic Header Content Injected -->
             </div>
 
-            <!-- LOADING STATE -->
-            <div id="loadingState" class="hidden py-14 text-center space-y-2.5">
-                <div class="w-11 h-11 bg-sky-100 rounded-full flex items-center justify-center mx-auto text-sky-600 animate-spin">
-                    <i data-lucide="loader-2" class="w-5 h-5"></i>
-                </div>
+            <!-- SCROLLABLE MODAL BODY -->
+            <div id="popUpBody" class="modal-scroll-body flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-3.5">
+                <!-- Dynamic Body Content Injected -->
+            </div>
+
+            <!-- STICKY MODAL FOOTER -->
+            <div class="p-3 sm:px-5 sm:py-3.5 bg-slate-50 border-t border-slate-200/80 shrink-0 flex items-center gap-2">
+                <button type="button" onclick="closePopUp()" class="hidden sm:inline-flex py-2.5 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 font-bold text-xs transition-all">
+                    Batal
+                </button>
+                <button onclick="saveAndClosePopUp()" class="flex-1 py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-sky-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-300"></i>
+                    Simpan & Selesai
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SEARCHABLE FELLOWSHIP PICKER OVERLAY       -->
+    <!-- ========================================== -->
+    <div id="fellowshipPickerModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 pointer-events-none opacity-0 transition-opacity duration-200">
+        <div onclick="closeFellowshipPicker()" class="absolute inset-0 bg-slate-950/70 backdrop-blur-xs"></div>
+        
+        <div class="relative w-full max-w-sm sm:max-w-md bg-white rounded-2xl p-4 shadow-2xl max-h-[75vh] flex flex-col overflow-hidden border border-slate-100">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5 shrink-0">
                 <div>
-                    <h3 class="font-bold text-slate-700 text-xs">Memuat data dari Google Sheets...</h3>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Menghubungkan ke SheetDB API</p>
+                    <h3 class="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider">Pilih Status Persekutuan</h3>
+                    <p class="text-[10.5px] text-slate-500">Pilih persekutuan tempat jiwa baru bergabung</p>
+                </div>
+                <button onclick="closeFellowshipPicker()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Search Input for Fellowships -->
+            <div class="pt-3 pb-2 shrink-0">
+                <div class="relative">
+                    <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" id="fellowshipSearchInput" placeholder="Cari nama persekutuan..." 
+                           class="w-full bg-slate-50 border border-slate-200 text-xs sm:text-sm rounded-xl pl-8 pr-3 py-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                           oninput="filterFellowships()">
                 </div>
             </div>
 
-            <!-- EMPTY STATE -->
-            <div id="emptyState" class="hidden py-14 text-center space-y-2.5">
-                <div class="w-11 h-11 bg-slate-200/70 rounded-full flex items-center justify-center mx-auto text-slate-400">
-                    <i data-lucide="user-x" class="w-5 h-5"></i>
-                </div>
+            <!-- Scrollable Fellowship Items List -->
+            <div id="fellowshipListContainer" class="modal-scroll-body flex-1 overflow-y-auto space-y-1.5 pr-1 pt-1">
+                <!-- Dynamic Fellowship Items injected -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ADD NEWCOMER MODAL                         -->
+    <!-- ========================================== -->
+    <div id="addModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 pointer-events-none opacity-0 transition-opacity duration-200">
+        <div onclick="closeAddModal()" class="absolute inset-0 bg-slate-950/75 backdrop-blur-xs"></div>
+        
+        <div class="relative w-full max-w-md sm:max-w-lg bg-white rounded-2xl p-4 sm:p-5 shadow-2xl max-h-[88vh] flex flex-col overflow-hidden border border-slate-100">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5 shrink-0">
                 <div>
-                    <h3 class="font-bold text-slate-700 text-xs">Tidak ada data jiwa baru</h3>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Coba ubah kata kunci pencarian atau filter status.</p>
+                    <h2 class="text-sm sm:text-base font-bold text-slate-900">Tambah Jiwa Baru</h2>
+                    <p class="text-[10.5px] sm:text-xs text-slate-500">Input data jiwa baru dari form ibadah</p>
                 </div>
+                <button onclick="closeAddModal()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
             </div>
-        </main>
 
-        <!-- FLOATING ACTION BUTTON (+ Tambah Jiwa Baru) -->
-        <button onclick="openAddModal()" 
-                class="fixed bottom-4 right-4 sm:absolute sm:bottom-4 sm:right-4 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white px-3.5 py-3 rounded-full shadow-lg shadow-sky-600/30 flex items-center gap-1.5 transition-all z-20 focus:outline-none">
-            <i data-lucide="user-plus" class="w-4 h-4"></i>
-            <span class="font-bold text-xs">Tambah Jiwa Baru</span>
-        </button>
-
-        <!-- TOAST NOTIFICATION -->
-        <div id="toast" class="fixed bottom-16 left-1/2 -translate-x-1/2 sm:absolute sm:bottom-16 bg-slate-900/95 backdrop-blur-md text-white text-xs font-semibold px-3.5 py-2 rounded-full shadow-xl border border-slate-700 flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 z-50 whitespace-nowrap">
-            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
-            <span id="toastMsg">Data berhasil diperbarui!</span>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- CENTERED POP-UP MODAL                      -->
-        <!-- ========================================== -->
-        <div id="popUpModal" class="fixed inset-0 sm:absolute z-40 pointer-events-none opacity-0 transition-opacity duration-200">
-            <!-- Dark Backdrop (Blocks touch bleed to background) -->
-            <div onclick="closePopUp()" class="popup-backdrop absolute inset-0 bg-slate-950/80 backdrop-blur-xs"></div>
-            
-            <!-- Modal Dialog Container -->
-            <div class="popup-dialog absolute inset-x-3 top-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden border border-slate-100">
-                
-                <!-- STICKY MODAL HEADER -->
-                <div id="popUpHeader" class="bg-slate-900 text-white p-3 shrink-0 flex items-center justify-between border-b border-slate-800">
-                    <!-- Dynamic Header Content Injected -->
+            <form id="addForm" onsubmit="saveNewcomer(event)" class="modal-scroll-body space-y-3 overflow-y-auto pt-3 pr-1 flex-1">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap *</label>
+                    <input type="text" id="addNama" required placeholder="Contoh: Daniel Pratama" class="w-full bg-slate-50 border border-slate-200 text-xs sm:text-sm rounded-xl px-3 py-2 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
                 </div>
 
-                <!-- SCROLLABLE MODAL BODY (Overscroll Contained) -->
-                <div id="popUpBody" class="modal-scroll-body flex-1 overflow-y-auto p-3 space-y-3 no-scrollbar">
-                    <!-- Dynamic Body Content Injected -->
-                </div>
-
-                <!-- STICKY MODAL FOOTER (NO DELETE BUTTON) -->
-                <div class="p-2.5 bg-slate-50 border-t border-slate-200/80 shrink-0">
-                    <button onclick="saveAndClosePopUp()" class="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md shadow-sky-600/20 active:scale-98 transition-all flex items-center justify-center gap-2">
-                        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-300"></i>
-                        Simpan & Selesai
-                    </button>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- SEARCHABLE FELLOWSHIP PICKER OVERLAY       -->
-        <!-- ========================================== -->
-        <div id="fellowshipPickerModal" class="fixed inset-0 sm:absolute z-50 pointer-events-none opacity-0 transition-opacity duration-200">
-            <div onclick="closeFellowshipPicker()" class="popup-backdrop absolute inset-0 bg-slate-950/70 backdrop-blur-xs"></div>
-            
-            <div class="absolute inset-x-4 top-1/2 -translate-y-1/2 bg-white rounded-2xl p-3.5 shadow-2xl max-h-[75vh] flex flex-col overflow-hidden border border-slate-100">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-2 shrink-0">
+                <div class="grid grid-cols-2 gap-2.5">
                     <div>
-                        <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Pilih Status Persekutuan</h3>
-                        <p class="text-[10px] text-slate-500">Pilih persekutuan tempat jiwa baru bergabung</p>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Jenis Kelamin *</label>
+                        <select id="addJenisKelamin" class="w-full bg-slate-50 border border-slate-200 text-xs sm:text-sm rounded-xl px-2.5 py-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            <option value="Laki-laki">Laki-laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
                     </div>
-                    <button onclick="closeFellowshipPicker()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </button>
-                </div>
-
-                <!-- Search Input for Fellowships -->
-                <div class="pt-2.5 pb-1.5 shrink-0">
-                    <div class="relative">
-                        <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                        <input type="text" id="fellowshipSearchInput" placeholder="Cari nama persekutuan..." 
-                               class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl pl-8 pr-3 py-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                               oninput="filterFellowships()">
-                    </div>
-                </div>
-
-                <!-- Scrollable Fellowship Items List -->
-                <div id="fellowshipListContainer" class="modal-scroll-body flex-1 overflow-y-auto space-y-1 pr-0.5 no-scrollbar pt-1">
-                    <!-- Dynamic Fellowship Items injected -->
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- ADD NEWCOMER MODAL                         -->
-        <!-- ========================================== -->
-        <div id="addModal" class="fixed inset-0 sm:absolute z-50 pointer-events-none opacity-0 transition-opacity duration-200">
-            <div onclick="closeAddModal()" class="popup-backdrop absolute inset-0 bg-slate-950/75 backdrop-blur-xs"></div>
-            
-            <div class="absolute inset-x-3.5 top-1/2 -translate-y-1/2 bg-white rounded-2xl p-3.5 shadow-2xl max-h-[85vh] flex flex-col overflow-hidden border border-slate-100">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-2 shrink-0">
                     <div>
-                        <h2 class="text-sm font-bold text-slate-900">Tambah Jiwa Baru</h2>
-                        <p class="text-[10px] text-slate-500">Input data jiwa baru dari form ibadah</p>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Status Aktivitas</label>
+                        <select id="addStatusPekerjaan" class="w-full bg-slate-50 border border-slate-200 text-xs sm:text-sm rounded-xl px-2.5 py-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            <option value="Mahasiswa">Mahasiswa</option>
+                            <option value="Pelajar">Pelajar</option>
+                            <option value="Bekerja">Bekerja</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
                     </div>
-                    <button onclick="closeAddModal()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </button>
                 </div>
 
-                <form id="addForm" onsubmit="saveNewcomer(event)" class="modal-scroll-body space-y-2.5 overflow-y-auto pt-2.5 pr-0.5 flex-1 no-scrollbar">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap *</label>
-                        <input type="text" id="addNama" required placeholder="Contoh: Daniel Pratama" class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Jenis Kelamin *</label>
-                            <select id="addJenisKelamin" class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl px-2.5 py-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                                <option value="Laki-laki">Laki-laki</option>
-                                <option value="Perempuan">Perempuan</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Status Aktivitas</label>
-                            <select id="addStatusPekerjaan" class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl px-2.5 py-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                                <option value="Mahasiswa">Mahasiswa</option>
-                                <option value="Pelajar">Pelajar</option>
-                                <option value="Bekerja">Bekerja</option>
-                                <option value="Lainnya">Lainnya</option>
-                            </select>
-                        </div>
-                    </div>
-
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">No. WhatsApp / Telp *</label>
-                        <input type="tel" id="addWa" required placeholder="08123456789" class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        <input type="tel" id="addWa" required placeholder="08123456789" class="w-full bg-slate-50 border border-slate-200 text-xs sm:text-sm rounded-xl px-3 py-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
                     </div>
-
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Nama Sekolah / Kampus / Tempat Kerja</label>
-                        <input type="text" id="addInstansi" placeholder="Contoh: UNPAD / ITB / Telkom University" class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Sekolah / Kampus / Kerja</label>
+                        <input type="text" id="addInstansi" placeholder="UNPAD / ITB / Kantor" class="w-full bg-slate-50 border border-slate-200 text-xs sm:text-sm rounded-xl px-3 py-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
                     </div>
+                </div>
 
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Tujuan Kedatangan</label>
+                    <input type="text" id="addTujuan" placeholder="Mencari komunitas Youth, diajak teman..." class="w-full bg-slate-50 border border-slate-200 text-xs sm:text-sm rounded-xl px-3 py-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Tujuan Kedatangan</label>
-                        <input type="text" id="addTujuan" placeholder="Mencari komunitas Youth, diajak teman..." class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Alamat Saat Ini</label>
+                        <input type="text" id="addAlamatSaatIni" placeholder="Kost / Rumah" class="w-full bg-slate-50 border border-slate-200 text-xs sm:text-sm rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
                     </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Alamat Saat Ini</label>
-                            <input type="text" id="addAlamatSaatIni" placeholder="Kost / Rumah" class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Alamat Domisili (Asal)</label>
-                            <input type="text" id="addAlamatDomisili" placeholder="Kota Asal" class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                        </div>
-                    </div>
-
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Diajak oleh Siapa / Sumber Info?</label>
-                        <input type="text" id="addDiajak" placeholder="Nama pengajak atau Instagram Youth" class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Alamat Domisili (Asal)</label>
+                        <input type="text" id="addAlamatDomisili" placeholder="Kota Asal" class="w-full bg-slate-50 border border-slate-200 text-xs sm:text-sm rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
                     </div>
+                </div>
 
-                    <div class="pt-1.5">
-                        <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md shadow-sky-600/20 active:scale-98 transition-all flex items-center justify-center gap-2">
-                            <i data-lucide="user-check" class="w-4 h-4"></i>
-                            Simpan Data Jiwa Baru
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Diajak oleh Siapa / Sumber Info?</label>
+                    <input type="text" id="addDiajak" placeholder="Nama pengajak atau Instagram Youth" class="w-full bg-slate-50 border border-slate-200 text-xs sm:text-sm rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                </div>
 
-        <!-- ========================================== -->
-        <!-- REST API CONFIG & CSV EXPORT MODAL         -->
-        <!-- ========================================== -->
-        <div id="configModal" class="fixed inset-0 sm:absolute z-50 pointer-events-none opacity-0 transition-opacity duration-200">
-            <div onclick="closeConfigModal()" class="popup-backdrop absolute inset-0 bg-slate-950/75 backdrop-blur-xs"></div>
-            <div class="modal-scroll-body absolute inset-x-3.5 top-1/2 -translate-y-1/2 bg-white rounded-2xl p-3.5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto border border-slate-100">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i>
-                        <h3 class="font-bold text-slate-900 text-xs">Integrasi Google Sheets (16 Kolom)</h3>
-                    </div>
-                    <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-600">
-                        <i data-lucide="x" class="w-4 h-4"></i>
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-sky-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="user-check" class="w-4 h-4"></i>
+                        Simpan Data Jiwa Baru
                     </button>
                 </div>
-                
-                <p class="text-[11px] text-slate-600 leading-relaxed">
-                    Aplikasi ini sudah terhubung langsung ke SheetDB REST API Google Sheets (16 Kolom). Setiap perubahan data akan otomatis disinkronkan.
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- REST API CONFIG & CSV EXPORT MODAL         -->
+    <!-- ========================================== -->
+    <div id="configModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 pointer-events-none opacity-0 transition-opacity duration-200">
+        <div onclick="closeConfigModal()" class="absolute inset-0 bg-slate-950/75 backdrop-blur-xs"></div>
+        <div class="modal-scroll-body relative w-full max-w-md sm:max-w-lg bg-white rounded-2xl p-4 sm:p-5 shadow-2xl space-y-3.5 max-h-[88vh] overflow-y-auto border border-slate-100">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600"></i>
+                    <h3 class="font-bold text-slate-900 text-xs sm:text-sm">Integrasi Google Sheets (16 Kolom)</h3>
+                </div>
+                <button onclick="closeConfigModal()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+            <p class="text-[11px] sm:text-xs text-slate-600 leading-relaxed">
+                Aplikasi ini sudah terhubung langsung ke SheetDB REST API Google Sheets (16 Kolom). Setiap perubahan data akan otomatis disinkronkan.
+            </p>
+
+            <div class="space-y-2.5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">REST API Endpoint URL:</label>
+                    <input type="url" id="sheetEndpoint" placeholder="https://sheetdb.io/api/v1/a330y1m4fcad4" 
+                           class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5 font-mono text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">API Token (Opsional):</label>
+                    <input type="password" id="sheetApiKey" placeholder="Bearer Token (kosongkan jika publik)" 
+                           class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5 font-mono text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                </div>
+            </div>
+
+            <div class="bg-slate-100 p-3 rounded-xl text-slate-700 text-xs space-y-1">
+                <span class="font-bold flex items-center gap-1.5 text-slate-900"><i data-lucide="columns" class="w-3.5 h-3.5 text-sky-600"></i> Header 16 Kolom Spreadsheet:</span>
+                <p class="text-[9.5px] sm:text-[10.5px] font-mono text-slate-600 leading-relaxed">
+                    Timestamp | Nama | Jenis Kelamin | No Telp | Tujuan Kedatangan | Nama Sekolah/Kampus/Tempat Kerja | Alamat Saat Ini | Alamat Domisili | Diajak oleh Siapa atau Dapat Info Ibadah dari Mana? | Status Pelajar/Mahasiswa/Bekerja | Status Persekutuan | Dimuridkan | Datang Persekutuan | Ibadah di Youth Fire Movement GKKD-BP | Gereja Lokal GKKD-BP | KETERANGAN
                 </p>
+            </div>
 
-                <div class="space-y-2">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">REST API Endpoint URL:</label>
-                        <input type="url" id="sheetEndpoint" placeholder="https://sheetdb.io/api/v1/a330y1m4fcad4" 
-                               class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl p-2 font-mono text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">API Token (Opsional):</label>
-                        <input type="password" id="sheetApiKey" placeholder="Bearer Token (kosongkan jika publik)" 
-                               class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl p-2 font-mono text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                    </div>
-                </div>
-
-                <div class="bg-slate-100 p-2.5 rounded-xl text-slate-700 text-xs space-y-1">
-                    <span class="font-bold flex items-center gap-1 text-slate-900"><i data-lucide="columns" class="w-3.5 h-3.5 text-sky-600"></i> Header 16 Kolom Spreadsheet:</span>
-                    <p class="text-[9px] font-mono text-slate-600 leading-tight">
-                        Timestamp | Nama | Jenis Kelamin | No Telp | Tujuan Kedatangan | Nama Sekolah/Kampus/Tempat Kerja | Alamat Saat Ini | Alamat Domisili | Diajak oleh Siapa atau Dapat Info Ibadah dari Mana? | Status Pelajar/Mahasiswa/Bekerja | Status Persekutuan | Dimuridkan | Datang Persekutuan | Ibadah di Youth Fire Movement GKKD-BP | Gereja Lokal GKKD-BP | KETERANGAN
-                    </p>
-                </div>
-
-                <div class="space-y-2 pt-1">
-                    <button onclick="saveConfig()" class="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl shadow-md transition-all">
-                        Simpan & Muat Ulang dari Sheets
+            <div class="space-y-2 pt-1">
+                <button onclick="saveConfig()" class="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all">
+                    Simpan & Muat Ulang dari Sheets
+                </button>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="exportToCSV()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i> Download CSV
                     </button>
-                    
-                    <div class="flex items-center gap-2">
-                        <button onclick="exportToCSV()" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5">
-                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Download CSV
-                        </button>
-                        <button onclick="resetDataset()" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5">
-                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Mode Sampel
-                        </button>
-                    </div>
+                    <button onclick="resetDataset()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Mode Sampel
+                    </button>
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- JAVASCRIPT LOGIC -->
@@ -457,6 +485,7 @@
         const initialSampleData = [
             {
                 id: 'n1',
+                originalNama: 'Kevin Pratama Wijaya',
                 timestamp: '22 Nov 2026 17:15',
                 nama: 'Kevin Pratama Wijaya',
                 jenisKelamin: 'Laki-laki',
@@ -492,12 +521,9 @@
 
         // Reference-counted background scroll lock for stacked modals
         let modalLockCount = 0;
-        let savedScrollY = 0;
 
         function lockBodyScroll() {
             if (modalLockCount === 0) {
-                savedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
-                document.body.style.top = `-${savedScrollY}px`;
                 document.body.classList.add('modal-open');
             }
             modalLockCount++;
@@ -507,10 +533,27 @@
             modalLockCount = Math.max(0, modalLockCount - 1);
             if (modalLockCount === 0) {
                 document.body.classList.remove('modal-open');
-                document.body.style.top = '';
-                window.scrollTo(0, savedScrollY);
             }
         }
+
+        // Desktop Keyboard UX: Close topmost modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            const fellowshipModal = document.getElementById('fellowshipPickerModal');
+            const addModal = document.getElementById('addModal');
+            const configModal = document.getElementById('configModal');
+            const popUpModal = document.getElementById('popUpModal');
+
+            if (fellowshipModal && !fellowshipModal.classList.contains('opacity-0')) {
+                closeFellowshipPicker();
+            } else if (addModal && !addModal.classList.contains('opacity-0')) {
+                closeAddModal();
+            } else if (configModal && !configModal.classList.contains('opacity-0')) {
+                closeConfigModal();
+            } else if (popUpModal && !popUpModal.classList.contains('opacity-0')) {
+                closePopUp();
+            }
+        });
 
         // ==========================================
         // DATE PARSER & FORMATTER (Indonesian Months)
@@ -524,11 +567,9 @@
         function parseTimestampToMillis(ts) {
             if (!ts) return 0;
             const str = String(ts).trim();
-            // Handle Google Forms format like "DD/MM/YYYY HH:mm:ss" or "MM/DD/YYYY HH:mm:ss"
             const parsedNative = Date.parse(str);
             if (!isNaN(parsedNative)) return parsedNative;
 
-            // Format: "22 Nov 2026 17:15" or "22 Nov 2026"
             const parts = str.split(/\s+/);
             if (parts.length >= 3) {
                 const day = parseInt(parts[0], 10);
@@ -620,14 +661,12 @@
                 .replace(/'/g, '&#039;');
         }
 
-        // Helper untuk membaca kolom dari SheetDB secara fleksibel
         function getColValue(row, possibleKeys, fallback = '') {
             for (const key of possibleKeys) {
                 if (row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== '') {
                     return String(row[key]).trim();
                 }
             }
-            // Case-insensitive fallback
             const rowKeys = Object.keys(row);
             for (const key of possibleKeys) {
                 const lowerKey = key.toLowerCase();
@@ -649,11 +688,11 @@
 
             label.textContent = text;
             if (status === 'live') {
-                dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
+                dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400';
             } else if (status === 'loading') {
-                dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse';
+                dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 animate-pulse';
             } else {
-                dot.className = 'w-1.5 h-1.5 rounded-full bg-rose-400';
+                dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-rose-400';
             }
         }
 
@@ -759,7 +798,6 @@
                 let bodyObj = { data: [payload] };
 
                 if (!isNew) {
-                    // SheetDB PATCH endpoint: {endpoint}/Nama/{value}
                     const lookupName = person.originalNama || person.nama;
                     url = `${url}/Nama/${encodeURIComponent(lookupName)}`;
                     method = 'PATCH';
@@ -818,7 +856,7 @@
             Object.keys(pills).forEach(key => {
                 const btn = document.getElementById(`pill-${key}`);
                 if (!btn) return;
-                btn.className = `filter-pill shrink-0 px-2.5 py-1 rounded-xl font-bold transition-all ${
+                btn.className = `filter-pill shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl font-bold transition-all ${
                     currentFilter === key ? pills[key].active : pills[key].inactive
                 }`;
             });
@@ -899,7 +937,7 @@
             const hasTidak = hasTidakStatus(person);
             const dateBadge = extractShortDate(person.timestamp);
 
-            let cardClass = 'bg-white border-slate-200/90 hover:border-sky-300';
+            let cardClass = 'bg-white border-slate-200/90 hover:border-sky-400 hover:shadow-md';
             let avatarClass = isComplete
                 ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
                 : 'bg-sky-100 text-sky-700 border-sky-200';
@@ -909,7 +947,7 @@
             let nameClass = 'text-slate-800';
 
             if (hasTidak) {
-                cardClass = 'bg-rose-50/90 border-rose-300 hover:border-rose-400';
+                cardClass = 'bg-rose-50/90 border-rose-300 hover:border-rose-400 hover:shadow-md';
                 avatarClass = 'bg-rose-100 text-rose-700 border-rose-300';
                 scoreClass = 'bg-rose-100 text-rose-700 border-rose-300';
                 nameClass = 'text-rose-950';
@@ -918,42 +956,46 @@
             const miniStripHtml = checklistItems.map(item => {
                 const st = normalizeStatus(person[item.key]);
                 if (st === 'SUDAH') {
-                    return `<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-200/80">✓ ${item.shortLabel}</span>`;
+                    return `<span class="inline-flex items-center gap-0.5 px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-200/80">✓ ${item.shortLabel}</span>`;
                 } else if (st === 'TIDAK') {
-                    return `<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-300">✕ ${item.shortLabel}</span>`;
+                    return `<span class="inline-flex items-center gap-0.5 px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">✕ ${item.shortLabel}</span>`;
                 } else {
-                    return `<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-semibold bg-slate-100 text-slate-400 border border-slate-200/70">• ${item.shortLabel}</span>`;
+                    return `<span class="inline-flex items-center gap-0.5 px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-semibold bg-slate-100 text-slate-400 border border-slate-200/70">• ${item.shortLabel}</span>`;
                 }
             }).join('');
 
             const row = document.createElement('div');
             row.onclick = () => openPopUp(person.id);
-            row.className = `rounded-xl border px-2.5 py-2 cursor-pointer active:scale-[0.99] transition-all shadow-2xs ${cardClass}`;
+            row.className = `rounded-xl sm:rounded-2xl border px-3 py-2.5 sm:p-3.5 cursor-pointer active:scale-[0.99] transition-all shadow-2xs flex flex-col justify-between ${cardClass}`;
 
             row.innerHTML = `
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-full border flex items-center justify-center font-extrabold text-[11px] shrink-0 ${avatarClass}">
+                <div class="flex items-start gap-2.5 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center font-extrabold text-[11px] sm:text-xs shrink-0 mt-0.5 ${avatarClass}">
                         ${escapeHtml(getInitials(person.nama))}
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between gap-1.5">
-                            <h3 class="font-bold text-xs truncate ${nameClass}">${escapeHtml(person.nama)}</h3>
-                            <span class="shrink-0 text-[9.5px] font-semibold text-slate-500 bg-white/80 px-1.5 py-0.5 rounded-md border border-slate-200/80">
+                            <h3 class="font-bold text-xs sm:text-sm truncate ${nameClass}">${escapeHtml(person.nama)}</h3>
+                            <span class="shrink-0 text-[9.5px] sm:text-[10.5px] font-semibold text-slate-500 bg-white/80 px-1.5 py-0.5 rounded-md border border-slate-200/80">
                                 ${escapeHtml(dateBadge)}
                             </span>
                         </div>
-                        <p class="text-[10.5px] text-slate-500 truncate mt-0.5">
+                        <p class="text-[10.5px] sm:text-xs text-slate-500 truncate mt-0.5">
                             ${escapeHtml(person.statusPekerjaan || 'Lainnya')} • ${escapeHtml(person.instansi || '-')}
                         </p>
+                        ${person.statusPersekutuan && person.statusPersekutuan !== 'Belum Ada'
+                            ? `<p class="hidden sm:flex items-center gap-1 text-[11px] text-sky-700 font-semibold truncate mt-1"><i data-lucide="users" class="w-3 h-3 shrink-0"></i> ${escapeHtml(person.statusPersekutuan)}</p>`
+                            : ''
+                        }
                     </div>
-                    <div class="flex items-center gap-1 shrink-0">
-                        <span class="px-1.5 py-0.5 rounded-lg text-[10px] font-extrabold border ${scoreClass}">
+                    <div class="flex items-center gap-1 shrink-0 mt-0.5">
+                        <span class="px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-extrabold border ${scoreClass}">
                             ${score}/4
                         </span>
-                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400"></i>
                     </div>
                 </div>
-                <div class="flex items-center gap-1 mt-1.5 pl-10 flex-wrap">
+                <div class="flex items-center gap-1 sm:gap-1.5 mt-2 sm:mt-3 pl-10 sm:pl-0 flex-wrap">
                     ${miniStripHtml}
                 </div>
             `;
@@ -969,7 +1011,7 @@
             if (!person) return;
 
             activeNewcomerId = id;
-            isBiodataOpen = false;
+            isBiodataOpen = window.innerWidth >= 768; // Terbuka otomatis di desktop agar cepat dibaca
 
             renderPopUpHeader(person);
             renderPopUpBody(person);
@@ -1015,19 +1057,19 @@
 
             header.innerHTML = `
                 <div class="min-w-0 pr-2">
-                    <h2 class="text-sm font-extrabold text-white truncate">${escapeHtml(person.nama)}</h2>
-                    <div class="flex items-center gap-1.5 text-[10px] text-slate-300 mt-0.5">
-                        <i data-lucide="calendar" class="w-3 h-3 text-sky-400"></i>
+                    <h2 class="text-sm sm:text-base font-extrabold text-white truncate">${escapeHtml(person.nama)}</h2>
+                    <div class="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-300 mt-0.5">
+                        <i data-lucide="calendar" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-sky-400"></i>
                         <span>${escapeHtml(person.timestamp || '-')}</span>
                     </div>
                 </div>
-                <div class="flex items-center gap-1.5 shrink-0">
+                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
                     <a href="${waUrl}" target="_blank" rel="noopener noreferrer"
-                       class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold active:scale-95 transition-all">
-                        <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
-                        <span>WA</span>
+                       class="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] sm:text-xs font-bold active:scale-95 transition-all">
+                        <i data-lucide="message-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                        <span>Hubungi WA</span>
                     </a>
-                    <button onclick="closePopUp()" class="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center active:scale-95">
+                    <button onclick="closePopUp()" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center active:scale-95">
                         <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -1041,7 +1083,7 @@
                 const isSelected = (person.statusPekerjaan || 'Lainnya') === opt;
                 return `
                     <button type="button" onclick="updateActivityStatus('${opt}')"
-                            class="py-1.5 px-2 rounded-xl text-[11px] font-bold border transition-all active:scale-95 ${
+                            class="py-1.5 sm:py-2 px-2 rounded-xl text-[11px] sm:text-xs font-bold border transition-all active:scale-95 ${
                                 isSelected
                                     ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
                                     : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
@@ -1054,9 +1096,9 @@
             const checklistHtml = checklistItems.map(item => {
                 const currentVal = normalizeStatus(person[item.key]);
                 return `
-                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 space-y-2">
-                        <div class="text-xs font-bold text-slate-800 leading-snug">${escapeHtml(item.label)}</div>
-                        <div class="grid grid-cols-3 gap-1.5">
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 sm:p-3 space-y-2 sm:flex sm:items-center sm:justify-between sm:space-y-0 sm:gap-3">
+                        <div class="text-xs sm:text-sm font-bold text-slate-800 leading-snug sm:flex-1">${escapeHtml(item.label)}</div>
+                        <div class="grid grid-cols-3 gap-1.5 sm:w-60 shrink-0">
                             <button type="button" onclick="updateChecklistStatus('${item.key}', 'BELUM')"
                                     class="py-2 rounded-lg text-[11px] font-extrabold border transition-all active:scale-95 ${
                                         currentVal === 'BELUM'
@@ -1090,19 +1132,19 @@
 
             body.innerHTML = `
                 <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/70">
-                    <button type="button" onclick="toggleBiodata()" class="w-full px-3 py-2 flex items-center justify-between text-left bg-slate-100/80 hover:bg-slate-100 transition-colors">
-                        <span class="text-[11px] font-extrabold text-slate-700 uppercase tracking-wide flex items-center gap-1.5">
+                    <button type="button" onclick="toggleBiodata()" class="w-full px-3.5 py-2.5 flex items-center justify-between text-left bg-slate-100/80 hover:bg-slate-100 transition-colors">
+                        <span class="text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide flex items-center gap-1.5">
                             <i data-lucide="user-round" class="w-3.5 h-3.5 text-sky-600"></i>
                             Biodata Jiwa Baru
                         </span>
-                        <span class="text-[10.5px] font-bold text-sky-600 flex items-center gap-1">
+                        <span class="text-[10.5px] sm:text-xs font-bold text-sky-600 flex items-center gap-1">
                             ${isBiodataOpen ? 'Sembunyikan' : 'Tampilkan'}
                             <i data-lucide="${isBiodataOpen ? 'chevron-up' : 'chevron-down'}" class="w-3.5 h-3.5"></i>
                         </span>
                     </button>
 
-                    <div class="${isBiodataOpen ? 'block' : 'hidden'} p-3 space-y-2 border-t border-slate-200 bg-white text-[11px]">
-                        <div class="grid grid-cols-2 gap-2">
+                    <div class="${isBiodataOpen ? 'block' : 'hidden'} p-3.5 space-y-2.5 border-t border-slate-200 bg-white text-[11px] sm:text-xs">
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <span class="text-[9.5px] font-bold text-slate-400 uppercase block">Jenis Kelamin</span>
                                 <span class="font-semibold text-slate-800">${escapeHtml(person.jenisKelamin || '-')}</span>
@@ -1112,15 +1154,17 @@
                                 <span class="font-semibold text-slate-800">${escapeHtml(person.noTelp || '-')}</span>
                             </div>
                         </div>
-                        <div>
-                            <span class="text-[9.5px] font-bold text-slate-400 uppercase block">Sekolah / Kampus / Tempat Kerja</span>
-                            <span class="font-semibold text-slate-800">${escapeHtml(person.instansi || '-')}</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <span class="text-[9.5px] font-bold text-slate-400 uppercase block">Sekolah / Kampus / Tempat Kerja</span>
+                                <span class="font-semibold text-slate-800">${escapeHtml(person.instansi || '-')}</span>
+                            </div>
+                            <div>
+                                <span class="text-[9.5px] font-bold text-slate-400 uppercase block">Tujuan Kedatangan</span>
+                                <span class="font-semibold text-slate-800">${escapeHtml(person.tujuanKedatangan || '-')}</span>
+                            </div>
                         </div>
-                        <div>
-                            <span class="text-[9.5px] font-bold text-slate-400 uppercase block">Tujuan Kedatangan</span>
-                            <span class="font-semibold text-slate-800">${escapeHtml(person.tujuanKedatangan || '-')}</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <span class="text-[9.5px] font-bold text-slate-400 uppercase block">Alamat Saat Ini</span>
                                 <span class="font-semibold text-slate-800">${escapeHtml(person.alamatSaatIni || '-')}</span>
@@ -1137,27 +1181,29 @@
                     </div>
                 </div>
 
-                <div class="space-y-1.5">
-                    <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wide">Status Aktivitas / Pekerjaan</label>
-                    <div class="grid grid-cols-4 gap-1.5">
-                        ${activityButtonsHtml}
-                    </div>
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wide">Status Persekutuan</label>
-                    <button type="button" onclick="openFellowshipPicker()"
-                            class="w-full px-3 py-2.5 rounded-xl bg-slate-50 hover:bg-sky-50/60 border border-slate-200 hover:border-sky-300 flex items-center justify-between transition-all text-left active:scale-[0.99]">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <i data-lucide="users" class="w-4 h-4 text-sky-600 shrink-0"></i>
-                            <span class="text-xs font-bold ${currentFellowship === 'Belum Ada' ? 'text-slate-500' : 'text-slate-800'} truncate">
-                                ${escapeHtml(currentFellowship)}
-                            </span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="space-y-1.5">
+                        <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wide">Status Aktivitas / Pekerjaan</label>
+                        <div class="grid grid-cols-4 sm:grid-cols-2 gap-1.5">
+                            ${activityButtonsHtml}
                         </div>
-                        <span class="text-[10.5px] font-bold text-sky-600 shrink-0 ml-2 flex items-center gap-0.5">
-                            Ubah <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-                        </span>
-                    </button>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wide">Status Persekutuan</label>
+                        <button type="button" onclick="openFellowshipPicker()"
+                                class="w-full px-3 py-2.5 sm:py-3 rounded-xl bg-slate-50 hover:bg-sky-50/60 border border-slate-200 hover:border-sky-300 flex items-center justify-between transition-all text-left active:scale-[0.99]">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <i data-lucide="users" class="w-4 h-4 text-sky-600 shrink-0"></i>
+                                <span class="text-xs sm:text-sm font-bold ${currentFellowship === 'Belum Ada' ? 'text-slate-500' : 'text-slate-800'} truncate">
+                                    ${escapeHtml(currentFellowship)}
+                                </span>
+                            </div>
+                            <span class="text-[10.5px] sm:text-xs font-bold text-sky-600 shrink-0 ml-2 flex items-center gap-0.5">
+                                Ubah <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                            </span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="space-y-2">
@@ -1171,7 +1217,7 @@
                     <label for="popupKeterangan" class="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wide">Keterangan</label>
                     <textarea id="popupKeterangan" rows="3" placeholder="Tulis catatan follow-up, hasil kunjungan, atau pokok doa..."
                               oninput="updateKeteranganLive(this.value)"
-                              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500">${escapeHtml(person.keterangan || '')}</textarea>
+                              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 sm:p-3 text-xs sm:text-sm text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500">${escapeHtml(person.keterangan || '')}</textarea>
                 </div>
             `;
 
@@ -1221,6 +1267,9 @@
             lockBodyScroll();
 
             if (window.lucide) lucide.createIcons();
+            if (input && window.innerWidth >= 768) {
+                setTimeout(() => input.focus(), 100);
+            }
         }
 
         function closeFellowshipPicker() {
@@ -1258,7 +1307,7 @@
                                     ? 'bg-sky-50 border-sky-400 text-sky-900 font-extrabold'
                                     : 'bg-white border-slate-100 hover:bg-slate-50 text-slate-700 font-semibold'
                             }">
-                        <span class="text-xs">${escapeHtml(opt)}</span>
+                        <span class="text-xs sm:text-sm">${escapeHtml(opt)}</span>
                         ${isSelected
                             ? '<i data-lucide="check-circle-2" class="w-4 h-4 text-sky-600 shrink-0"></i>'
                             : '<span class="w-4 h-4 rounded-full border border-slate-300 shrink-0"></span>'
