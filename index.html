@@ -1419,16 +1419,8 @@
                 };
                 if (apiConfig.apiKey) headers['Authorization'] = `Bearer ${apiConfig.apiKey}`;
 
-                const payload = {
-                    'Timestamp': person.timestamp,
-                    'Nama': person.nama,
-                    'Jenis Kelamin': person.jenisKelamin,
-                    'No Telp': person.noTelp,
-                    'Tujuan Kedatangan': person.tujuanKedatangan,
-                    'Nama Sekolah/Kampus/Tempat Kerja': person.instansi,
-                    'Alamat Saat Ini': person.alamatSaatIni,
-                    'Alamat Domisili': person.alamatDomisili,
-                    'Diajak oleh Siapa atau Dapat Info Ibadah dari Mana?': person.diajakOleh,
+                // 7 kolom follow-up yang boleh diubah saat UPDATE (agar kolom IMPORTRANGE tetap aman)
+                const followUpPayload = {
                     'Status Pelajar/Mahasiswa/Bekerja': person.statusPekerjaan,
                     'Status Persekutuan': person.statusPersekutuan,
                     'Dimuridkan': normalizeStatus(person.dimuridkan),
@@ -1440,13 +1432,28 @@
 
                 let url = apiConfig.endpoint.replace(/\/$/, '');
                 let method = 'POST';
-                let bodyObj = { data: [payload] };
+                let bodyObj;
 
                 if (!isNew) {
+                    // PATCH: Hanya kirim 7 kolom follow-up, 9 kolom biodata IMPORTRANGE tidak disentuh
                     const lookupName = person.originalNama || person.nama;
                     url = `${url}/Nama/${encodeURIComponent(lookupName)}`;
                     method = 'PATCH';
-                    bodyObj = { data: payload };
+                    bodyObj = { data: followUpPayload };
+                } else {
+                    const fullPayload = {
+                        'Timestamp': person.timestamp,
+                        'Nama': person.nama,
+                        'Jenis Kelamin': person.jenisKelamin,
+                        'No Telp': person.noTelp,
+                        'Tujuan Kedatangan': person.tujuanKedatangan,
+                        'Nama Sekolah/Kampus/Tempat Kerja': person.instansi,
+                        'Alamat Saat Ini': person.alamatSaatIni,
+                        'Alamat Domisili': person.alamatDomisili,
+                        'Diajak oleh Siapa atau Dapat Info Ibadah dari Mana?': person.diajakOleh,
+                        ...followUpPayload
+                    };
+                    bodyObj = { data: [fullPayload] };
                 }
 
                 const res = await fetch(url, {
