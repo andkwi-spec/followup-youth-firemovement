@@ -168,35 +168,42 @@
                 </div>
             </div>
 
-            <!-- LIVE METRICS BAR (4 KPI Cards) -->
-            <div class="grid grid-cols-4 gap-1.5 sm:gap-3">
-                <div class="bg-slate-800/80 px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-slate-700 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
-                    <span class="text-[8.5px] sm:text-xs font-bold text-slate-400 uppercase block">
+            <!-- LIVE METRICS BAR (5 KPI Cards) -->
+            <div class="grid grid-cols-5 gap-1 sm:gap-2.5 lg:gap-3">
+                <div class="bg-slate-800/80 px-1.5 sm:px-3 lg:px-4 py-1.5 sm:py-2.5 rounded-xl border border-slate-700 text-center md:text-left md:flex md:items-center md:justify-between gap-1">
+                    <span class="text-[8px] sm:text-[10.5px] lg:text-xs font-bold text-slate-400 uppercase block truncate">
                         <span class="sm:hidden">Total</span>
                         <span class="hidden sm:inline">Total Jiwa</span>
                     </span>
-                    <span class="text-xs sm:text-lg font-extrabold text-white" id="statTotal">0</span>
+                    <span class="text-xs sm:text-base lg:text-lg font-extrabold text-white" id="statTotal">0</span>
                 </div>
-                <div class="bg-sky-950/60 px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-sky-800/60 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
-                    <span class="text-[8.5px] sm:text-xs font-bold text-sky-300 uppercase block">
+                <div class="bg-sky-950/60 px-1.5 sm:px-3 lg:px-4 py-1.5 sm:py-2.5 rounded-xl border border-sky-800/60 text-center md:text-left md:flex md:items-center md:justify-between gap-1">
+                    <span class="text-[8px] sm:text-[10.5px] lg:text-xs font-bold text-sky-300 uppercase block truncate">
                         <span class="sm:hidden">Ibadah</span>
                         <span class="hidden sm:inline">Ibadah Youth</span>
                     </span>
-                    <span class="text-xs sm:text-lg font-extrabold text-sky-200" id="statYouthPct">0%</span>
+                    <span class="text-xs sm:text-base lg:text-lg font-extrabold text-sky-200" id="statYouthPct">0%</span>
                 </div>
-                <div class="bg-indigo-950/60 px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-indigo-800/60 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
-                    <span class="text-[8.5px] sm:text-xs font-bold text-indigo-300 uppercase block">
+                <div class="bg-indigo-950/60 px-1.5 sm:px-3 lg:px-4 py-1.5 sm:py-2.5 rounded-xl border border-indigo-800/60 text-center md:text-left md:flex md:items-center md:justify-between gap-1">
+                    <span class="text-[8px] sm:text-[10.5px] lg:text-xs font-bold text-indigo-300 uppercase block truncate">
                         <span class="sm:hidden">Gerlok</span>
                         <span class="hidden sm:inline">Gereja Lokal</span>
                     </span>
-                    <span class="text-xs sm:text-lg font-extrabold text-indigo-200" id="statGerlokPct">0%</span>
+                    <span class="text-xs sm:text-base lg:text-lg font-extrabold text-indigo-200" id="statGerlokPct">0%</span>
                 </div>
-                <div class="bg-emerald-950/60 px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-emerald-800/60 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
-                    <span class="text-[8.5px] sm:text-xs font-bold text-emerald-300 uppercase block">
+                <div class="bg-violet-950/60 px-1.5 sm:px-3 lg:px-4 py-1.5 sm:py-2.5 rounded-xl border border-violet-800/60 text-center md:text-left md:flex md:items-center md:justify-between gap-1">
+                    <span class="text-[8px] sm:text-[10.5px] lg:text-xs font-bold text-violet-300 uppercase block truncate">
+                        <span class="sm:hidden">Pskt</span>
+                        <span class="hidden sm:inline">Persekutuan</span>
+                    </span>
+                    <span class="text-xs sm:text-base lg:text-lg font-extrabold text-violet-200" id="statPersekutuanPct">0%</span>
+                </div>
+                <div class="bg-emerald-950/60 px-1.5 sm:px-3 lg:px-4 py-1.5 sm:py-2.5 rounded-xl border border-emerald-800/60 text-center md:text-left md:flex md:items-center md:justify-between gap-1">
+                    <span class="text-[8px] sm:text-[10.5px] lg:text-xs font-bold text-emerald-300 uppercase block truncate">
                         <span class="sm:hidden">Murid</span>
                         <span class="hidden sm:inline">Dimuridkan</span>
                     </span>
-                    <span class="text-xs sm:text-lg font-extrabold text-emerald-200" id="statDimuridkanPct">0%</span>
+                    <span class="text-xs sm:text-base lg:text-lg font-extrabold text-emerald-200" id="statDimuridkanPct">0%</span>
                 </div>
             </div>
         </div>
@@ -1531,6 +1538,7 @@
             const total = scopedData.length;
             let ibadahSudah = 0;
             let gerlokSudah = 0;
+            let persekutuanSudah = 0;
             let muridSudah = 0;
             let cntBelumLengkap = 0;
             let cntLengkap = 0;
@@ -1539,6 +1547,7 @@
             scopedData.forEach(p => {
                 if (normalizeStatus(p.ibadahYouth) === 'SUDAH') ibadahSudah++;
                 if (normalizeStatus(p.gerlok) === 'SUDAH') gerlokSudah++;
+                if (normalizeStatus(p.datangPersekutuan) === 'SUDAH') persekutuanSudah++;
                 if (normalizeStatus(p.dimuridkan) === 'SUDAH') muridSudah++;
 
                 const score = getCompletionScore(p);
@@ -1552,6 +1561,7 @@
             document.getElementById('statTotal').textContent = total;
             document.getElementById('statYouthPct').textContent = total > 0 ? `${Math.round((ibadahSudah / total) * 100)}%` : '0%';
             document.getElementById('statGerlokPct').textContent = total > 0 ? `${Math.round((gerlokSudah / total) * 100)}%` : '0%';
+            document.getElementById('statPersekutuanPct').textContent = total > 0 ? `${Math.round((persekutuanSudah / total) * 100)}%` : '0%';
             document.getElementById('statDimuridkanPct').textContent = total > 0 ? `${Math.round((muridSudah / total) * 100)}%` : '0%';
 
             // Update Filter Counts
