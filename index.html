@@ -126,6 +126,36 @@
                 </div>
             </div>
 
+            <!-- PERIOD SELECTOR BAR (DYNAMIC ANNUAL MONITORING) -->
+            <div class="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
+                <div class="relative" id="yearDropdownWrapper">
+                    <button type="button" onclick="toggleYearDropdown(event)" id="yearDropdownBtn"
+                            aria-haspopup="listbox" aria-expanded="false"
+                            class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700/90 border border-slate-700 hover:border-sky-500/70 text-[11px] sm:text-xs font-bold text-white transition-all active:scale-95 shadow-xs">
+                        <i data-lucide="calendar-range" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400 shrink-0"></i>
+                        <span class="text-slate-400 font-semibold">Periode:</span>
+                        <span id="selectedYearLabel" class="text-sky-300 font-extrabold">Memuat...</span>
+                        <i data-lucide="chevron-down" id="yearDropdownChevron" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200"></i>
+                    </button>
+
+                    <!-- Interactive Dropdown Popover -->
+                    <div id="yearDropdownMenu"
+                         class="hidden absolute left-0 mt-1.5 w-60 sm:w-64 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200/90 py-1.5 z-50">
+                        <div class="px-3 py-1.5 border-b border-slate-100 flex items-center justify-between">
+                            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Periode Tersedia</span>
+                            <span id="yearCountInfo" class="text-[10px] font-bold text-sky-600">0 tahun</span>
+                        </div>
+                        <div id="yearOptionsList" class="max-h-60 overflow-y-auto py-1 space-y-0.5 px-1.5">
+                            <!-- Dynamic year options injected here -->
+                        </div>
+                    </div>
+                </div>
+
+                <span id="periodSummaryHint" class="text-[10px] sm:text-xs text-slate-400 font-medium truncate">
+                    Monitoring tahunan aktif
+                </span>
+            </div>
+
             <!-- LIVE METRICS BAR (4 KPI Cards) -->
             <div class="grid grid-cols-4 gap-1.5 sm:gap-3">
                 <div class="bg-slate-800/80 px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-slate-700 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
@@ -514,6 +544,9 @@
         let newcomers = [];
         let currentFilter = 'semua';
         let currentSearch = '';
+        let currentYear = null; // Otomatis di-set ke tahun terbaru dari data saat pertama dibuka
+        let availableYears = [];
+        let hasInitializedYear = false;
         let activeNewcomerId = null;
         let isBiodataOpen = false;
 
@@ -539,9 +572,22 @@
             }
         }
 
-        // Desktop Keyboard UX: Close topmost modal with Escape key
+        // Close year dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const wrapper = document.getElementById('yearDropdownWrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                closeYearDropdown();
+            }
+        });
+
+        // Desktop Keyboard UX: Close topmost modal or dropdown with Escape key
         document.addEventListener('keydown', (e) => {
             if (e.key !== 'Escape') return;
+            const yearMenu = document.getElementById('yearDropdownMenu');
+            if (yearMenu && !yearMenu.classList.contains('hidden')) {
+                closeYearDropdown();
+                return;
+            }
             const fellowshipModal = document.getElementById('fellowshipPickerModal');
             const addModal = document.getElementById('addModal');
             const configModal = document.getElementById('configModal');
@@ -610,6 +656,171 @@
             const hh = String(now.getHours()).padStart(2, '0');
             const mm = String(now.getMinutes()).padStart(2, '0');
             return `${d} ${m} ${y} ${hh}:${mm}`;
+        }
+
+        // ==========================================
+        // DYNAMIC YEAR EXTRACTION & DROPDOWN LOGIC
+        // ==========================================
+        function extractYearFromTimestamp(ts) {
+            if (!ts) return 'Tanpa Tahun';
+            const str = String(ts).trim();
+            // Prioritaskan pola 4 digit tahun (19xx atau 20xx) dari berbagai format tanggal
+            const match = str.match(/\b(19|20)\d{2}\b/);
+            if (match) return match[0];
+
+            const ms = parseTimestampToMillis(str);
+            if (ms > 0) {
+                const yr = new Date(ms).getFullYear();
+                if (yr >= 1900 && yr <= 2100) return String(yr);
+            }
+            return 'Tanpa Tahun';
+        }
+
+        function syncAvailableYears(forceResetToLatest = false) {
+            const yearCounts = {};
+            newcomers.forEach(p => {
+                const yr = extractYearFromTimestamp(p.timestamp);
+                yearCounts[yr] = (yearCounts[yr] || 0) + 1;
+            });
+
+            // Pisahkan tahun numerik (urut terbaru -> terlama) & 'Tanpa Tahun' (jika ada)
+            const numericYears = Object.keys(yearCounts)
+                .filter(y => /^\d{4}$/.test(y))
+                .sort((a, b) => Number(b) - Number(a));
+
+            availableYears = [...numericYears];
+            if (yearCounts['Tanpa Tahun']) {
+                availableYears.push('Tanpa Tahun');
+            }
+
+            const latestYear = numericYears.length > 0
+                ? numericYears[0]
+                : (availableYears.length > 0 ? availableYears[0] : 'semua');
+
+            if (forceResetToLatest || !hasInitializedYear || !currentYear) {
+                currentYear = latestYear;
+                hasInitializedYear = true;
+            } else if (currentYear !== 'semua' && !availableYears.includes(currentYear)) {
+                currentYear = latestYear;
+            }
+
+            renderYearDropdown(yearCounts, numericYears[0] || null);
+        }
+
+        function renderYearDropdown(yearCounts, latestNumericYear) {
+            const labelEl = document.getElementById('selectedYearLabel');
+            const countInfoEl = document.getElementById('yearCountInfo');
+            const listEl = document.getElementById('yearOptionsList');
+            const hintEl = document.getElementById('periodSummaryHint');
+
+            if (!labelEl || !listEl) return;
+
+            const numericCount = availableYears.filter(y => /^\d{4}$/.test(y)).length;
+            if (countInfoEl) {
+                countInfoEl.textContent = `${numericCount} tahun`;
+            }
+
+            if (availableYears.length === 0) {
+                labelEl.textContent = 'Belum Ada Data';
+                if (hintEl) hintEl.textContent = 'Belum ada data tersedia';
+                listEl.innerHTML = '<div class="px-3 py-3 text-center text-xs text-slate-400">Belum ada periode data</div>';
+                return;
+            }
+
+            // Update trigger button label
+            if (currentYear === 'semua') {
+                labelEl.textContent = 'Semua Tahun';
+                if (hintEl) hintEl.textContent = `Rekap seluruh periode (${newcomers.length} jiwa)`;
+            } else if (currentYear === 'Tanpa Tahun') {
+                labelEl.textContent = 'Tanpa Tahun';
+                if (hintEl) hintEl.textContent = `Data tanpa tanggal (${yearCounts['Tanpa Tahun'] || 0} jiwa)`;
+            } else {
+                labelEl.textContent = `Tahun ${currentYear}`;
+                const suffix = currentYear === latestNumericYear ? ' • Terbaru' : '';
+                if (hintEl) hintEl.textContent = `Periode ${currentYear}${suffix}`;
+            }
+
+            // Build interactive options
+            let optionsHtml = availableYears.map(yr => {
+                const isSelected = currentYear === yr;
+                const count = yearCounts[yr] || 0;
+                const isLatest = yr === latestNumericYear;
+                const displayLabel = yr === 'Tanpa Tahun' ? 'Tanpa Tahun' : `Tahun ${yr}`;
+
+                return `
+                    <button type="button" onclick="selectYear('${yr}')"
+                            class="w-full px-2.5 py-2 rounded-xl flex items-center justify-between text-left transition-all ${
+                                isSelected
+                                    ? 'bg-sky-50 text-sky-900 font-extrabold ring-1 ring-sky-300'
+                                    : 'hover:bg-slate-50 text-slate-700 font-semibold'
+                            }">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span class="text-xs sm:text-sm truncate">${displayLabel}</span>
+                            ${isLatest ? '<span class="px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-emerald-100 text-emerald-700 uppercase">Terbaru</span>' : ''}
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="text-[10.5px] font-bold ${isSelected ? 'text-sky-600' : 'text-slate-400'}">${count} jiwa</span>
+                            ${isSelected ? '<i data-lucide="check" class="w-3.5 h-3.5 text-sky-600"></i>' : ''}
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            // Tambahkan opsi "Semua Tahun" jika terdapat lebih dari 1 periode
+            if (availableYears.length > 1) {
+                const isAllSelected = currentYear === 'semua';
+                optionsHtml += `
+                    <div class="my-1 border-t border-slate-100"></div>
+                    <button type="button" onclick="selectYear('semua')"
+                            class="w-full px-2.5 py-2 rounded-xl flex items-center justify-between text-left transition-all ${
+                                isAllSelected
+                                    ? 'bg-slate-900 text-white font-extrabold'
+                                    : 'hover:bg-slate-50 text-slate-600 font-semibold'
+                            }">
+                        <span class="text-xs sm:text-sm">Semua Tahun</span>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="text-[10.5px] font-bold ${isAllSelected ? 'text-sky-300' : 'text-slate-400'}">${newcomers.length} jiwa</span>
+                            ${isAllSelected ? '<i data-lucide="check" class="w-3.5 h-3.5 text-sky-400"></i>' : ''}
+                        </div>
+                    </button>
+                `;
+            }
+
+            listEl.innerHTML = optionsHtml;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function toggleYearDropdown(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('yearDropdownMenu');
+            const chevron = document.getElementById('yearDropdownChevron');
+            const btn = document.getElementById('yearDropdownBtn');
+            if (!menu) return;
+
+            const isHidden = menu.classList.contains('hidden');
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                if (chevron) chevron.classList.add('rotate-180');
+                if (btn) btn.setAttribute('aria-expanded', 'true');
+            } else {
+                closeYearDropdown();
+            }
+        }
+
+        function closeYearDropdown() {
+            const menu = document.getElementById('yearDropdownMenu');
+            const chevron = document.getElementById('yearDropdownChevron');
+            const btn = document.getElementById('yearDropdownBtn');
+            if (menu) menu.classList.add('hidden');
+            if (chevron) chevron.classList.remove('rotate-180');
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+
+        function selectYear(yr) {
+            currentYear = yr;
+            closeYearDropdown();
+            syncAvailableYears(false);
+            renderApp();
         }
 
         // ==========================================
@@ -762,6 +973,7 @@
             } finally {
                 if (loadingEl) loadingEl.classList.add('hidden');
                 if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+                syncAvailableYears(!hasInitializedYear);
                 renderApp();
             }
         }
@@ -865,8 +1077,14 @@
             });
         }
 
+        function getYearScopedNewcomers() {
+            if (!currentYear || currentYear === 'semua') return newcomers;
+            return newcomers.filter(p => extractYearFromTimestamp(p.timestamp) === currentYear);
+        }
+
         function renderApp() {
-            const total = newcomers.length;
+            const scopedData = getYearScopedNewcomers();
+            const total = scopedData.length;
             let ibadahSudah = 0;
             let gerlokSudah = 0;
             let muridSudah = 0;
@@ -874,7 +1092,7 @@
             let cntLengkap = 0;
             let cntTidak = 0;
 
-            newcomers.forEach(p => {
+            scopedData.forEach(p => {
                 if (normalizeStatus(p.ibadahYouth) === 'SUDAH') ibadahSudah++;
                 if (normalizeStatus(p.gerlok) === 'SUDAH') gerlokSudah++;
                 if (normalizeStatus(p.dimuridkan) === 'SUDAH') muridSudah++;
@@ -899,8 +1117,8 @@
             document.getElementById('cnt-tidak').textContent = cntTidak;
             updateFilterPillStyles();
 
-            // Sort by latest Timestamp descending
-            const sorted = [...newcomers].sort((a, b) => parseTimestampToMillis(b.timestamp) - parseTimestampToMillis(a.timestamp));
+            // Sort by latest Timestamp descending (scoped to selected year)
+            const sorted = [...scopedData].sort((a, b) => parseTimestampToMillis(b.timestamp) - parseTimestampToMillis(a.timestamp));
 
             // Filter by tab & search query
             const filtered = sorted.filter(p => {
@@ -1380,6 +1598,11 @@
             };
 
             newcomers.unshift(newItem);
+            const addedYear = extractYearFromTimestamp(newItem.timestamp);
+            if (currentYear && currentYear !== 'semua' && currentYear !== addedYear) {
+                currentYear = addedYear;
+            }
+            syncAvailableYears(false);
             closeAddModal();
             renderApp();
             syncItemToApi(newItem, true);
@@ -1443,7 +1666,8 @@
 
             const csvEscape = (val) => `"${String(val || '').replace(/"/g, '""')}"`;
 
-            const rows = newcomers.map(p => [
+            const exportSource = getYearScopedNewcomers();
+            const rows = exportSource.map(p => [
                 p.timestamp,
                 p.nama,
                 p.jenisKelamin,
@@ -1467,7 +1691,8 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'FollowUp_Youth_Fire_Movement_GKKD-BP.csv';
+            const periodSuffix = currentYear && currentYear !== 'semua' ? `_${currentYear.replace(/\s+/g, '_')}` : '_Semua_Tahun';
+            a.download = `FollowUp_Youth_Fire_Movement_GKKD-BP${periodSuffix}.csv`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1481,6 +1706,7 @@
             currentSearch = '';
             const searchEl = document.getElementById('searchInput');
             if (searchEl) searchEl.value = '';
+            syncAvailableYears(true);
             closeConfigModal();
             renderApp();
             showToast('Menampilkan data sampel lokal');
